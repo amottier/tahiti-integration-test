@@ -256,8 +256,8 @@ public class IntegrationTest {
 		Map<String, String> apiTypeManagerParams = new HashMap<>();
 
 		// URL for server (without web app name)
-		apiTypeManagerParams.put("server.url", System.getProperty("DEV_SERVER_URL"));
-
+		apiTypeManagerParams.put("server.url", System.getProperty("server.url"));
+		
 		// Bonita web application name
 		apiTypeManagerParams.put("application.name", BONITA_WEBAPP_NAME);
 
