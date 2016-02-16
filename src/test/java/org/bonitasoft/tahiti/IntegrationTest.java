@@ -76,6 +76,9 @@ public class IntegrationTest {
 
 	@Test
 	public void testHappyPath() throws Exception {
+		// Create process instance to initialize vacation available
+		createProcessInstance(INIT_VACATION_AVAILABLE, "1.0");
+		
 		// Create process instance
 		long processInstanceId = createProcessInstance(NEW_VACATION_REQUEST, "1.0", newVacationRequestInputs());
 
@@ -273,6 +276,12 @@ public class IntegrationTest {
 
 		return session;
 	}
+	
+
+	private void createProcessInstance(String processName, String processVersion) throws Exception {
+		createProcessInstance(processName, processVersion, null);
+		
+	}
 
 	private long createProcessInstance(String processName, String processVersion,
 			Map<String, Serializable> newProcessInstanceInputs) throws Exception {
@@ -280,8 +289,14 @@ public class IntegrationTest {
 		final ProcessDefinition processDefinition = processAPI.getProcessDefinition(processAPI.getProcessDefinitionId(
 				processName, processVersion));
 
-		ProcessInstance processInstance = processAPI.startProcessWithInputs(processDefinition.getId(),
+		ProcessInstance processInstance;
+		
+		if(newProcessInstanceInputs == null) {
+			processInstance = processAPI.startProcess(processDefinition.getId());
+		} else {
+			processInstance = processAPI.startProcessWithInputs(processDefinition.getId(),
 				newProcessInstanceInputs);
+		}
 
 		long processInstanceId = processInstance.getId();
 
