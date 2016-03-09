@@ -21,15 +21,19 @@ public class DateCreator {
 	}
 
 	public static Date createTomorrow() {
+		return createInXDays(1);
+	}
+	
+	public static Date createInXDays(int numberOfDays) {
 		Calendar calendar = createCalendarUTCTodayAtMidnight();
 
-		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
 
-		Date tomorrow = calendar.getTime();
+		Date dateInXDays = calendar.getTime();
 
-		return tomorrow;
+		return dateInXDays;
 	}
-
+	
 	private static Calendar createCalendarUTCTodayAtMidnight() {
 		Calendar calendar = new GregorianCalendar();
 
@@ -43,5 +47,6 @@ public class DateCreator {
 
 		return calendar;
 	}
+
 
 }

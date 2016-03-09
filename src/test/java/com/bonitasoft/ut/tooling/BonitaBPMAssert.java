@@ -142,6 +142,25 @@ public class BonitaBPMAssert {
 
 		// org.junit.Assert.assertEquals(expectedValue, vacationRequest.getStatus());
 	}
+	
+	public static <T> void assertBusinessDataReferenceNull(Class<T> businessObjectClass, long processInstanceId,
+			String businessDataName) throws Exception {
+
+		Map<String, Serializable> processInstanceExecutionContext;
+		try {
+			// Retrieve process reference to business data
+			processInstanceExecutionContext = processAPI.getProcessInstanceExecutionContext(processInstanceId);
+		} catch (ProcessInstanceNotFoundException e) {
+			Long archivedProcessInstanceId = processAPI.getFinalArchivedProcessInstance(processInstanceId).getId();
+			processInstanceExecutionContext = processAPI
+					.getArchivedProcessInstanceExecutionContext(archivedProcessInstanceId);
+		}
+
+		SimpleBusinessDataReference businessDataReference = (SimpleBusinessDataReference) processInstanceExecutionContext
+				.get(businessDataName + "_ref");
+		
+		Assert.assertNull(businessDataReference);
+	}
 
 	private static void waitForHumanTask() throws InterruptedException {
 		Thread.sleep(5000);

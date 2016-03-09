@@ -52,8 +52,8 @@ public class ProcessExecutionDriver {
 		}
 	}
 
-	public static void createProcessInstance(String processName, String processVersion) throws Exception {
-		createProcessInstance(processName, processVersion, null);
+	public static long createProcessInstance(String processName, String processVersion) throws Exception {
+		return createProcessInstance(processName, processVersion, null);
 	}
 
 	public static long createProcessInstance(String processName, String processVersion,
