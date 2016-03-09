@@ -32,10 +32,11 @@
 				<version>3.5.1</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
@@ -48,20 +49,111 @@
 					</systemPropertyVariables>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+				<version>2.0.0</version>
+
+				<!-- generate assertions at every build -->
+				<executions>
+					<execution>
+						<goals>
+							<goal>generate-assertions</goal>
+						</goals>
+					</execution>
+				</executions>
+
+				<configuration>
+					<packages>
+						<param>com.company.model</param>
+					</packages>
+
+					<excludes>
+						<param>.*DAO</param>
+						<param>.*DAOImpl</param>
+					</excludes>
+				</configuration>
+
+			</plugin>
 		</plugins>
+		<pluginManagement>
+			<plugins>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself. -->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>org.assertj</groupId>
+										<artifactId>assertj-assertions-generator-maven-plugin</artifactId>
+										<versionRange>[2.0.0,)</versionRange>
+										<goals>
+											<goal>generate-assertions</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
 
 	<dependencies>
+		<!-- Bonita BPM Engine Java client library to drive process execution -->
 		<dependency>
 			<groupId>org.bonitasoft.engine</groupId>
 			<artifactId>bonita-client</artifactId>
 			<version>7.2.0</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- JUnit as unit test framework -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- We need the Business Object Java classes definition -->
+		<dependency>
+			<groupId>com.company.model</groupId>
+			<artifactId>bdm-client</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- We need the Business Object Java classes definition (implementation of DAO) -->
+		<dependency>
+			<groupId>com.company.model</groupId>
+			<artifactId>bdm-dao</artifactId>
+			<version>1.0.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Required for business object access -->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.18.1-GA</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- To make assertion on business object easier -->
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.3.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
