@@ -46,7 +46,7 @@ public class IntegrationTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		System.setProperty("server.url", "http://192.168.1.236:8080/");
+		//System.setProperty("server.url", "http://192.168.1.236:8080/");
 
 		session = Server.httpConnect();
 		processAPI = TenantAPIAccessor.getProcessAPI(session);
