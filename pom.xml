@@ -10,20 +10,7 @@
 		<!-- server.url default value is override by CI configuration -->
 		<server.url>http://localhost:8080</server.url>
 	</properties>
-
-	<repositories>
-		<repository>
-			<id>bonita-releases</id>
-			<url>http://repositories.rd.lan/maven/releases/</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
+	
 	<build>
 		<plugins>
 			<plugin>
