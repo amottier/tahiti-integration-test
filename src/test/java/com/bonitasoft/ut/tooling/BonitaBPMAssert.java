@@ -163,10 +163,12 @@ public class BonitaBPMAssert {
 	}
 
 	private static void waitForHumanTask() throws InterruptedException {
+		// This is a temporary solution and will be replaced soon by a callback system triggered by Engine Event Handlers.
 		Thread.sleep(5000);
 	}
 
 	private static void waitForProcessInstanceCompletion() throws InterruptedException {
+		// This is a temporary solution and will be replaced soon by a callback system triggered by Engine Event Handlers.
 		Thread.sleep(5000);
 	}
 }
