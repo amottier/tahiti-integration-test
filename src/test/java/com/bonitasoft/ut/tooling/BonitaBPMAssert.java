@@ -2,21 +2,19 @@ package com.bonitasoft.ut.tooling;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.bdm.BusinessObjectDAOFactory;
 import org.bonitasoft.engine.bdm.dao.BusinessObjectDAO;
-import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
-import org.bonitasoft.engine.bpm.process.ArchivedProcessInstance;
-import org.bonitasoft.engine.bpm.process.ArchivedProcessInstancesSearchDescriptor;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
 import org.bonitasoft.engine.bpm.process.ProcessInstanceNotFoundException;
-import org.bonitasoft.engine.bpm.process.ProcessInstanceState;
 import org.bonitasoft.engine.business.data.SimpleBusinessDataReference;
-import org.bonitasoft.engine.search.SearchOptionsBuilder;
+import org.bonitasoft.engine.exception.BonitaException;
 import org.bonitasoft.engine.session.APISession;
 import org.junit.Assert;
+
+import com.bonitasoft.engine.api.APIClient;
 
 public class BonitaBPMAssert {
 
@@ -26,10 +24,24 @@ public class BonitaBPMAssert {
 	/** Session is needed to access business data value */
 	private static APISession session;
 
-	/** setUp method must be call before using assertion. Recommendation is to add it to setUpClass / @BeforeClass */
-	public static void setUp(APISession session, ProcessAPI processAPI) {
+	/** APITestUtil is used to wait for task to be ready or process instance to be finished using Engine call back */
+	private static APITestUtil apiTestUtil;
+
+	/**
+	 * setUp method must be call before using assertion. Recommendation is to add it to setUpClass / @BeforeClass
+	 * 
+	 * @throws BonitaException
+	 */
+	public static void setUp(APISession session, ProcessAPI processAPI) throws BonitaException {
 		BonitaBPMAssert.processAPI = processAPI;
 		BonitaBPMAssert.session = session;
+		APIClient apiClient = new APIClient(session);
+		BonitaBPMAssert.apiTestUtil = new APITestUtil(apiClient);
+		ClientEventUtil.deployCommand(session);
+	}
+	
+	public static void tearDown() throws BonitaException {
+		ClientEventUtil.undeployCommand(BonitaBPMAssert.session);
 	}
 
 	/**
@@ -50,37 +62,17 @@ public class BonitaBPMAssert {
 	public static void assertHumanTaskIsPendingAndExecute(long processInstanceId, String string,
 			Map<String, Serializable> taskInputs, long userId) throws Exception {
 
-		HumanTaskInstance humanTaskInstance = assertHumanTaskIsPending(processInstanceId, string);
+		ActivityInstance activityInstance = assertHumanTaskIsPending(processInstanceId, string);
 
-		ProcessExecutionDriver.executePendingHumanTask(humanTaskInstance, userId, taskInputs);
+		ProcessExecutionDriver.executePendingHumanTask(activityInstance, userId, taskInputs);
 	}
 
-	public static HumanTaskInstance assertHumanTaskIsPending(long processInstanceId, String string)
-			throws InterruptedException {
-		waitForHumanTask();
-
-		List<HumanTaskInstance> humanTaskInstances = processAPI.getHumanTaskInstances(processInstanceId, string, 0, 2);
-
-		org.junit.Assert.assertEquals(1, humanTaskInstances.size());
-
-		HumanTaskInstance humanTaskInstance = humanTaskInstances.get(0);
-
-		return humanTaskInstance;
+	public static ActivityInstance assertHumanTaskIsPending(long processInstanceId, String string) throws Exception {
+		return waitForHumanTask(processInstanceId, string, TestStates.READY);
 	}
 
 	public static void assertProcessInstanceIsFinished(long processInstanceId) throws Exception {
-		waitForProcessInstanceCompletion();
-
-		SearchOptionsBuilder searchBuilder = new SearchOptionsBuilder(0, 100);
-		searchBuilder.filter(ArchivedProcessInstancesSearchDescriptor.SOURCE_OBJECT_ID, processInstanceId);
-
-		List<ArchivedProcessInstance> archivedProcessInstances = processAPI.searchArchivedProcessInstances(
-				searchBuilder.done()).getResult();
-
-		org.junit.Assert.assertEquals(1, archivedProcessInstances.size());
-		ArchivedProcessInstance archivedProcessInstance = archivedProcessInstances.get(0);
-		org.junit.Assert.assertEquals(processInstanceId, archivedProcessInstance.getSourceObjectId());
-		org.junit.Assert.assertEquals(ProcessInstanceState.COMPLETED.getId(), archivedProcessInstance.getStateId());
+		waitForProcessInstanceCompletion(processInstanceId);
 	}
 
 	/**
@@ -121,28 +113,17 @@ public class BonitaBPMAssert {
 
 		BusinessObjectDAO businessObjectDAO = daoFactory.createDAO(session, daoClass);
 
-		// daoClass.getConstructor(APISession.class, Class.class).newInstance(session, daoFactory);
-
-		// Method createDAOMethod = daoClass.getMethod("findByPersistenceId", Long.class);
-
-		// BusinessObjectDAO vacationRequestDAO = daoFactory.createDAO(session, daoClass);
-
 		Method findByPersistenceIdMethod = daoClass.getMethod("findByPersistenceId", Long.class);
 
 		@SuppressWarnings("unchecked")
 		T businessObject = (T) findByPersistenceIdMethod
 				.invoke(businessObjectDAO, businessDataReference.getStorageId());
 
-		// VacationRequest vacationRequest =
-		// vacationRequestDAO.findByPersistenceId(businessDataReference.getStorageId());
-
 		Assert.assertNotNull(businessObject);
 
 		return businessObject;
-
-		// org.junit.Assert.assertEquals(expectedValue, vacationRequest.getStatus());
 	}
-	
+
 	public static <T> void assertBusinessDataReferenceNull(Class<T> businessObjectClass, long processInstanceId,
 			String businessDataName) throws Exception {
 
@@ -158,17 +139,17 @@ public class BonitaBPMAssert {
 
 		SimpleBusinessDataReference businessDataReference = (SimpleBusinessDataReference) processInstanceExecutionContext
 				.get(businessDataName + "_ref");
-		
+
 		Assert.assertNull(businessDataReference);
 	}
 
-	private static void waitForHumanTask() throws InterruptedException {
-		// This is a temporary solution and will be replaced soon by a callback system triggered by Engine Event Handlers.
-		Thread.sleep(5000);
+	private static ActivityInstance waitForHumanTask(final long processInstanceId, final String taskName,
+			final TestStates state) throws Exception {
+		return apiTestUtil.waitForTaskInState(processInstanceId, taskName, state);
 	}
 
-	private static void waitForProcessInstanceCompletion() throws InterruptedException {
-		// This is a temporary solution and will be replaced soon by a callback system triggered by Engine Event Handlers.
-		Thread.sleep(5000);
+	private static void waitForProcessInstanceCompletion(long processInstanceId) throws Exception {
+		apiTestUtil.waitForProcessToFinish(processInstanceId);
 	}
+
 }

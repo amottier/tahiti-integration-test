@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bonitasoft.engine.api.ProcessAPI;
-import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
 import org.bonitasoft.engine.bpm.process.ProcessDefinition;
 import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfo;
 import org.bonitasoft.engine.bpm.process.ProcessDeploymentInfoCriterion;
@@ -75,13 +75,11 @@ public class ProcessExecutionDriver {
 		return processInstanceId;
 	}
 
-	public static void executePendingHumanTask(HumanTaskInstance humanTaskInstance, Long userId,
+	public static void executePendingHumanTask(ActivityInstance activityInstance, Long userId,
 			Map<String, Serializable> taskInputs) throws Exception {
-		long humanTaskInstanceId = humanTaskInstance.getId();
+		long humanTaskInstanceId = activityInstance.getId();
 
-		processAPI.assignUserTask(humanTaskInstanceId, userId);
-
-		processAPI.executeUserTask(humanTaskInstanceId, taskInputs);
+		processAPI.executeUserTask(userId, humanTaskInstanceId, taskInputs);
 	}
 
 }

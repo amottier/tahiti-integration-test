@@ -9,8 +9,9 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- server.url default value is override by CI configuration -->
 		<server.url>http://localhost:8080</server.url>
+		<bonita.version>7.2.1</bonita.version>
 	</properties>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -98,9 +99,9 @@
 	<dependencies>
 		<!-- Bonita BPM Engine Java client library to drive process execution -->
 		<dependency>
-			<groupId>org.bonitasoft.engine</groupId>
-			<artifactId>bonita-client</artifactId>
-			<version>7.2.0</version>
+			<groupId>com.bonitasoft.engine</groupId>
+			<artifactId>bonita-client-sp</artifactId>
+			<version>${bonita.version}</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -141,6 +142,22 @@
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 			<version>3.3.0</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- For logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-jdk14</artifactId>
+			<version>1.7.7</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Server side library is needed to have commands definition -->
+		<dependency>
+			<groupId>com.bonitasoft.engine</groupId>
+			<artifactId>bonita-server-sp</artifactId>
+			<version>${bonita.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

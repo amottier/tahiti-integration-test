@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.bonitasoft.engine.api.ProcessAPI;
 import org.bonitasoft.engine.api.TenantAPIAccessor;
-import org.bonitasoft.engine.bpm.flownode.HumanTaskInstance;
+import org.bonitasoft.engine.bpm.flownode.ActivityInstance;
 import org.bonitasoft.engine.session.APISession;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -46,8 +46,6 @@ public class IntegrationTest {
 
 	@BeforeClass
 	public static void setUpClass() throws Exception {
-		//System.setProperty("server.url", "http://192.168.1.236:8080/");
-
 		session = Server.httpConnect();
 		processAPI = TenantAPIAccessor.getProcessAPI(session);
 
@@ -60,6 +58,7 @@ public class IntegrationTest {
 		// Run a process to remove all business data
 		ProcessExecutionDriver.createProcessInstance(CLEAN_BDM_PROCESS, PROCESSES_VERSION);
 
+		BonitaBPMAssert.tearDown();
 		Server.logout(session);
 	}
 
@@ -129,7 +128,7 @@ public class IntegrationTest {
 				PROCESSES_VERSION, newVacationRequestInputs);
 
 		// Check reviewRequest step is pending
-		HumanTaskInstance pendingHumanTask = BonitaBPMAssert.assertHumanTaskIsPending(
+		ActivityInstance pendingHumanTask = BonitaBPMAssert.assertHumanTaskIsPending(
 				newVacationRequestProcessInstanceId, "Review request");
 
 		// Check that vacation request business data has the expected value
@@ -186,7 +185,7 @@ public class IntegrationTest {
 				PROCESSES_VERSION, newVacationRequestInputs);
 
 		// Check reviewRequest step is pending
-		HumanTaskInstance pendingHumanTask = BonitaBPMAssert.assertHumanTaskIsPending(
+		ActivityInstance pendingHumanTask = BonitaBPMAssert.assertHumanTaskIsPending(
 				newVacationRequestProcessInstanceId, "Review request");
 
 		// Check that vacation request business data has been created
