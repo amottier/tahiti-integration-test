@@ -38,7 +38,7 @@ public class IntegrationTest {
 
 	private static final String MODIFY_VACATION_REQUEST = "Modify Pending Vacation Request";
 
-	private static final String PROCESSES_VERSION = "1.2.0";
+	private static final String PROCESSES_VERSION = "1.3.0";
 
 	private static APISession session;
 
