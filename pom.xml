@@ -3,13 +3,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.bonitasoft.tahiti</groupId>
 	<artifactId>tests</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- server.url default value is override by CI configuration -->
 		<server.url>http://localhost:8080</server.url>
-		<bonita.version>7.2.1</bonita.version>
+		<bonita.version>7.3.3</bonita.version>
 	</properties>
 
 	<build>
@@ -17,7 +17,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
+				<version>3.6.0</version>
 				<configuration>
 					<encoding>UTF-8</encoding>
 					<source>1.8</source>
@@ -141,7 +141,7 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.3.0</version>
+			<version>3.6.1</version>
 			<scope>test</scope>
 		</dependency>
 
