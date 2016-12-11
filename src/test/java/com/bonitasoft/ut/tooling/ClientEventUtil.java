@@ -25,7 +25,9 @@ import org.bonitasoft.engine.command.CommandDescriptor;
 import org.bonitasoft.engine.command.CommandExecutionException;
 import org.bonitasoft.engine.command.CommandNotFoundException;
 import org.bonitasoft.engine.command.CommandParameterizationException;
+import org.bonitasoft.engine.exception.AlreadyExistsException;
 import org.bonitasoft.engine.exception.BonitaException;
+import org.bonitasoft.engine.exception.CreationException;
 import org.bonitasoft.engine.session.APISession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,16 +83,28 @@ public class ClientEventUtil {
 
         final Map<String, Serializable> parameters = new HashMap<String, Serializable>(1);
 
-        final CommandDescriptor waitServerCommand = commandAPI.register(WAIT_SERVER_COMMAND, WAIT_SERVER_COMMAND,
+        final CommandDescriptor waitServerCommand = safelyRegisterCommand(commandAPI, WAIT_SERVER_COMMAND, WAIT_SERVER_COMMAND,
                 "org.bonitasoft.engine.synchro.WaitServerCommand");
-        final CommandDescriptor addHandlerCommand = commandAPI.register(ADD_HANDLER_COMMAND, ADD_HANDLER_COMMAND,
+        final CommandDescriptor addHandlerCommand = safelyRegisterCommand(commandAPI, ADD_HANDLER_COMMAND, ADD_HANDLER_COMMAND,
                 "org.bonitasoft.engine.synchro.AddHandlerCommand");
-        final CommandDescriptor executeEventsCommand = commandAPI.register(EXECUTE_EVENTS_COMMAND, EXECUTE_EVENTS_COMMAND,
+        final CommandDescriptor executeEventsCommand = safelyRegisterCommand(commandAPI, EXECUTE_EVENTS_COMMAND, EXECUTE_EVENTS_COMMAND,
                 "org.bonitasoft.engine.jobs.ExecuteEventHandlingNow");
 
         parameters.put("commands", (Serializable) Arrays.asList(waitServerCommand.getId(), addHandlerCommand.getId(), executeEventsCommand.getId()));
         commandAPI.execute(ADD_HANDLER_COMMAND, parameters);
         LOGGER.debug("commands deployed");
+    }
+    
+    private static CommandDescriptor safelyRegisterCommand(CommandAPI commandAPI, String name, String description, String implementation) throws CreationException {
+    	CommandDescriptor commandDescriptor;
+    	
+    	try {
+    		commandDescriptor = commandAPI.getCommand(name);
+    	} catch (CommandNotFoundException e) {
+			commandDescriptor = commandAPI.register(name, description, implementation);
+		}
+    	
+    	return commandDescriptor;
     }
 
     public static Long executeWaitServerCommand(final CommandAPI commandAPI, final Map<String, Serializable> event, final int defaultTimeout)
